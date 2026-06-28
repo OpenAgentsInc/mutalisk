@@ -6,6 +6,9 @@ selects, gates, and admits candidates via the Blueprint signature/evidence/
 receipt model. Mutalisk never mutates production state.
 """
 
-from .candidate import Candidate, CandidateEmitter
+__version__ = "0.0.1"
 
-__all__ = ["Candidate", "CandidateEmitter"]
+from .candidate import Candidate, CandidateEmitter
+from .emitter import FileCandidateEmitter
+
+__all__ = ["Candidate", "CandidateEmitter", "FileCandidateEmitter", "__version__"]
