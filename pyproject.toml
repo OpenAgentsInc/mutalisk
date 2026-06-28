@@ -1,0 +1,19 @@
+[project]
+name = "mutalisk"
+version = "0.0.1"
+description = "OpenAgents Python DSPy/GEPA offline-optimization lane: emits candidate artifacts for the Effect online authority to gate."
+requires-python = ">=3.11"
+dependencies = [
+  "dspy>=2.5",
+  "gepa>=0.1.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mutalisk"]
