@@ -10,5 +10,13 @@ __version__ = "0.0.1"
 
 from .candidate import Candidate, CandidateEmitter
 from .emitter import FileCandidateEmitter
+from .trace_eval import TraceEvalDataset, TraceEvalRecord
 
-__all__ = ["Candidate", "CandidateEmitter", "FileCandidateEmitter", "__version__"]
+__all__ = [
+    "Candidate",
+    "CandidateEmitter",
+    "FileCandidateEmitter",
+    "TraceEvalDataset",
+    "TraceEvalRecord",
+    "__version__",
+]

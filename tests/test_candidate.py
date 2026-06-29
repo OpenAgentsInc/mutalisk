@@ -6,26 +6,47 @@ from mutalisk.candidate import Candidate
 def _c(**kw):
     base = dict(
         signature="sig.example",
-        base_module_ref="module.base@1",
-        optimized_module={"prompt": "..."},
-        metric_name="pass_rate",
-        metric_value=0.91,
-        optimizer="gepa@0.1.1",
+        base_module={"ref": "module.base@1", "components": {"cue": "old"}},
+        optimized_module={"components": {"cue": "new"}, "optimizer": "gepa@0.1.1"},
+        metric={
+            "name": "pass_rate",
+            "value": 0.91,
+            "base_value": 0.50,
+            "eval_dataset_ref": "trace-eval://fixture",
+        },
         eval_evidence_refs=["eval://x"],
-        trace_provenance_refs=["trace://y"],
+        trace_provenance={
+            "refs": ["trace://y"],
+            "source": "fixture",
+            "record_count": 1,
+        },
     )
     base.update(kw)
     return Candidate(**base)
 
 
 def test_valid_candidate_serializes():
-    assert '"optimizer": "gepa@0.1.1"' in _c().to_json()
+    data = _c().to_dict()
+    assert set(data) == {
+        "signature",
+        "base_module",
+        "optimized_module",
+        "metric",
+        "eval_evidence_refs",
+        "trace_provenance",
+    }
+    assert data["optimized_module"]["optimizer"] == "gepa@0.1.1"
 
 
 def test_fails_closed_without_evidence():
     with pytest.raises(ValueError):
         _c(eval_evidence_refs=[]).validate()
     with pytest.raises(ValueError):
-        _c(trace_provenance_refs=[]).validate()
+        _c(trace_provenance={"refs": [], "source": "fixture", "record_count": 1}).validate()
     with pytest.raises(ValueError):
-        _c(optimizer="").validate()
+        _c(optimized_module={"components": {"cue": "new"}, "optimizer": ""}).validate()
+
+
+def test_fails_closed_without_metric_dataset_ref():
+    with pytest.raises(ValueError):
+        _c(metric={"name": "pass_rate", "value": 0.9, "base_value": 0.5}).validate()

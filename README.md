@@ -36,4 +36,24 @@ trace_provenance }` written to a shared store (R2/object). The Effect side reads
 candidates, runs its own acceptance gate, and only then promotes. Mutalisk never
 mutates production state.
 
+The local emitter writes the same candidate contract as JSON into the gitignored
+`candidates/` directory. The current offline runner can use the in-repo
+synthetic fixture or an explicit sanitized trace/eval JSONL file:
+
+```bash
+python -m mutalisk.optimize --optimizer local --trace-evals trace-evals.jsonl
+python -m mutalisk.optimize --optimizer gepa --max-metric-calls 60 --trace-evals trace-evals.jsonl
+```
+
+Each JSONL record must already be public-safe and contain only optimizer input
+plus refs:
+
+```json
+{"public_text":"great green build","label":"positive","split":"train","trace_ref":"trace://run/1","eval_ref":"eval://run/1"}
+```
+
+Candidate JSON records the eval and trace refs, dataset hash, metric, base
+module, optimized module, and optimizer version. It does not serialize raw
+trace/eval records.
+
 See `docs/ARCHITECTURE.md`.

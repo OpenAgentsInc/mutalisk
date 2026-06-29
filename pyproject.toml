@@ -4,12 +4,12 @@ version = "0.0.1"
 description = "OpenAgents Python DSPy/GEPA offline-optimization lane: emits candidate artifacts for the Effect online authority to gate."
 requires-python = ">=3.11"
 dependencies = [
-  "dspy>=2.5",
-  "gepa>=0.1.1",
+  "dspy==2.5.43",
+  "gepa==0.1.1",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = ["pytest==9.1.1", "ruff==0.15.20"]
 
 [project.scripts]
 mutalisk-optimize = "mutalisk.optimize:main"
