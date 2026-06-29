@@ -15,6 +15,7 @@ import sys
 from .emitter import FileCandidateEmitter
 from .optimizer import GepaOptimizer, LocalSearchOptimizer, Optimizer
 from .runner import run_optimization
+from .trace_eval import TraceEvalDataset
 
 
 def _build_optimizer(name: str, max_metric_calls: int, seed: int) -> Optimizer:
@@ -38,14 +39,24 @@ def main(argv: list[str] | None = None) -> int:
         default="candidates",
         help="candidate sink directory (gitignored; default: candidates)",
     )
+    parser.add_argument(
+        "--trace-evals",
+        help=(
+            "sanitized executed trace/eval JSONL file; records must contain "
+            "public_text, label, split, trace_ref, and eval_ref"
+        ),
+    )
     parser.add_argument("--max-metric-calls", type=int, default=60, help="GEPA budget")
     parser.add_argument("--seed", type=int, default=0, help="reproducibility seed")
     args = parser.parse_args(argv)
 
     optimizer = _build_optimizer(args.optimizer, args.max_metric_calls, args.seed)
     emitter = FileCandidateEmitter(args.out_dir)
+    trace_eval_dataset = (
+        TraceEvalDataset.from_jsonl(args.trace_evals) if args.trace_evals else None
+    )
 
-    out = run_optimization(optimizer, emitter)
+    out = run_optimization(optimizer, emitter, trace_eval_dataset=trace_eval_dataset)
     r = out.result
     print(f"optimizer:   {r.optimizer_id}")
     print(f"signature:   {out.candidate.signature}")

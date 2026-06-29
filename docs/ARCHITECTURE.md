@@ -23,15 +23,21 @@ results into **candidate artifacts** that the Effect online authority gates.
 1. **Program registry** — DSPy signatures/modules mirroring the Blueprint
    signatures we want to optimize (start with the Khala/Artanis operator
    programs).
-2. **Trace + eval ingestion** — pull public-safe executed traces and eval
-   results (provenance refs only; no raw prompts/customer data) as the
-   optimizer's training/validation sets.
+2. **Trace + eval ingestion** — load public-safe executed traces and eval
+   results as sanitized JSONL (`public_text`, `label`, `split`, `trace_ref`,
+   `eval_ref`). The optimizer receives the sanitized input text/labels; emitted
+   candidates carry only evidence/provenance refs, dataset hash, source label,
+   and record count. Raw prompts, customer data, private source, credentials,
+   and wallet material are rejected before optimization.
 3. **Optimizer runners** — GEPA (reflective) and DSPy teleprompters
    (MIPRO/BootstrapFewShot). Each run records `optimizer@version`, base module,
    metric, dataset, and provenance.
 4. **Candidate emitter** — validates (`Candidate.validate`, fail-closed) and
-   writes candidates to the shared store (R2/object) under a public-safe schema
-   agreed with the Effect side.
+   writes candidates under the public-safe schema
+   `{ signature, base_module, optimized_module, metric, eval_evidence_refs,
+   trace_provenance }`. The local file emitter writes the exact schema to a
+   gitignored directory; an R2/object-store emitter can later reuse the same
+   interface.
 5. **Reproducibility** — pinned deps, recorded versions, deterministic seeds
    where possible.
 
