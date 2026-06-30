@@ -21,8 +21,12 @@ results into **candidate artifacts** that the Effect online authority gates.
 ## Components (build-out)
 
 1. **Program registry** — DSPy signatures/modules mirroring the Blueprint
-   signatures we want to optimize (start with the Khala/Artanis operator
-   programs).
+   signatures we want to optimize. The initial registry includes the import-light
+   sentiment fixture plus the GD-2 `khala.fleet.delegate` mirror: a fixed
+   `ensure_pylon -> advertise_capacity -> select_account -> prepare_work ->
+   dispatch -> verify_closeout` pipeline whose optimizable candidate is limited
+   to `objective_template`, `verifier_selection`, `dispatch_policy`, and
+   `merge_resolution_template`.
 2. **Trace + eval ingestion** — load public-safe executed traces and eval
    results as sanitized JSONL (`public_text`, `label`, `split`, `trace_ref`,
    `eval_ref`). The optimizer receives the sanitized input text/labels; emitted
@@ -53,3 +57,9 @@ candidate-manifest shape on the Effect side, e.g. the GEPA candidate manifest
 `psionic.probe_gepa_candidate_manifest.v1`) must be agreed so the online
 authority can read and gate mutalisk output. That schema agreement is the first
 build-out task.
+
+The Khala fleet-delegation target is deliberately offline-only in Mutalisk. The
+Python mirror can score public-safe GD-0-style examples and expose the seed
+parameter dict for GEPA, but the Effect/TypeScript implementation remains the
+only runtime that selects accounts, dispatches assignments, admits candidate
+parameters, or writes OpenAgents state.

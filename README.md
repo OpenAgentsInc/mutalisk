@@ -56,4 +56,31 @@ Candidate JSON records the eval and trace refs, dataset hash, metric, base
 module, optimized module, and optimizer version. It does not serialize raw
 trace/eval records.
 
+## Khala fleet-delegation program mirror
+
+Mutalisk also contains the first GD-2 program target from
+`OpenAgentsInc/openagents#7730`: an offline mirror of the fixed
+`khala.fleet.delegate` pipeline:
+
+```text
+ensure_pylon -> advertise_capacity -> select_account -> prepare_work -> dispatch -> verify_closeout
+```
+
+The control flow is fixed. The optimizable candidate is only the public-safe
+parameter dict:
+
+```python
+{
+    "objective_template": "... {objective} ... {issue} ... {repo} ... {verify} ...",
+    "verifier_selection": "...",
+    "dispatch_policy": "...",
+    "merge_resolution_template": "...",
+}
+```
+
+`mutalisk.delegation` exposes the seed candidate, synthetic GD-0-style
+delegation examples, and deterministic offline scoring helpers. It does not
+call an LM or network API; later Mutalisk lanes can plug this target into the
+offline adapter, GEPA run, and candidate emitter.
+
 See `docs/ARCHITECTURE.md`.
