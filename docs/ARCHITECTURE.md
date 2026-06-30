@@ -40,12 +40,19 @@ results into **candidate artifacts** that the Effect online authority gates.
    reflective records with `Inputs`, `Generated Outputs`, and `Feedback(ASI)`
    sections carrying the GD-1 blocker refs.
 4. **Candidate emitter** — validates (`Candidate.validate`, fail-closed) and
-   writes candidates under the public-safe schema
-   `{ signature, base_module, optimized_module, metric, eval_evidence_refs,
-   trace_provenance }`. The local file emitter writes the exact schema to a
-   gitignored directory; the `khala-fleet-delegation` CLI target now emits a
+   writes candidates under the public-safe seam. `Candidate.to_manifest_summary`
+   mirrors the Effect-side GD-3
+   `KhalaFleetDelegationCandidateManifestSummary` field-for-field:
+   `schemaVersion: psionic.probe_gepa_candidate_manifest.v1`,
+   `candidateManifestRef`, `candidateRef`, `baseModuleRef`,
+   `optimizedModuleRef`, `signature`, `metricName`, `metricValueBps`,
+   `evalEvidenceRefs`, and `traceProvenanceRefs`. The local file emitter writes
+   a detailed artifact envelope containing that summary plus the optimized
+   module text; `R2CandidateEmitter` writes both the exact manifest summary and
+   the detailed artifact to an R2-compatible object store and upserts the summary
+   into a D1-compatible index. The `khala-fleet-delegation` CLI target emits a
    `khala.fleet.delegation` candidate with measured held-out gain over the seed
-   policy. An R2/object-store emitter can later reuse the same interface.
+   policy.
 5. **Reproducibility** — pinned deps, recorded versions, deterministic seeds
    where possible.
 
@@ -54,13 +61,15 @@ results into **candidate artifacts** that the Effect online authority gates.
 - No online serving, no routing, no governance/admission, no production writes,
   no payment/credit/promise logic. Those are product-surface authority.
 
-## Open seam to coordinate with the Effect side
+## Effect seam
 
-The shared **candidate schema** (`Candidate` here ↔ the Action Submission /
-candidate-manifest shape on the Effect side, e.g. the GEPA candidate manifest
-`psionic.probe_gepa_candidate_manifest.v1`) must be agreed so the online
-authority can read and gate mutalisk output. That schema agreement is the first
-build-out task.
+The shared **candidate schema** is now explicit on the Mutalisk side. The
+manifest summary matches the Effect admission loop's
+`psionic.probe_gepa_candidate_manifest.v1` Khala summary fields, while the
+detailed artifact remains the offline optimizer payload. R2 and D1 are sinks
+only: they store refs and public-safe proposal text. The online authority still
+performs Blueprint lookup, evidence checks, Action Submission, review, and any
+later admission.
 
 The Khala fleet-delegation target is deliberately offline-only in Mutalisk. The
 Python mirror can score public-safe GD-0-style examples and expose the seed

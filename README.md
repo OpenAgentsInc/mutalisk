@@ -30,15 +30,23 @@ governance** path stays native in Effect/TypeScript on Cloudflare Workers.
 
 ## The candidate contract (the seam)
 
-Mutalisk's only output is a **candidate artifact**: a structured, public-safe
-record `{ signature, base_module, optimized_module, metric, eval_evidence_refs,
-trace_provenance }` written to a shared store (R2/object). The Effect side reads
-candidates, runs its own acceptance gate, and only then promotes. Mutalisk never
-mutates production state.
+Mutalisk's only output is a **candidate artifact** plus an Effect-ingestible
+manifest summary. The detailed artifact carries the public-safe optimizer payload
+(`signature`, `base_module`, `optimized_module`, `metric`,
+`eval_evidence_refs`, and `trace_provenance`). The manifest summary is
+field-for-field with the GD-3 Khala admission seam:
+`psionic.probe_gepa_candidate_manifest.v1` with `candidateManifestRef`,
+`candidateRef`, `baseModuleRef`, `optimizedModuleRef`, `metricName`,
+`metricValueBps`, `evalEvidenceRefs`, and `traceProvenanceRefs`.
 
-The local emitter writes the same candidate contract as JSON into the gitignored
-`candidates/` directory. The current offline runner can use the in-repo
-synthetic fixture or an explicit sanitized trace/eval JSONL file:
+The local emitter writes the detailed artifact envelope into the gitignored
+`candidates/` directory. The R2 emitter writes two JSON objects: the exact
+manifest summary and the detailed artifact, then upserts the summary row into a
+D1-compatible index. The Effect side reads the manifest refs, runs its own
+acceptance gate, and only then promotes. Mutalisk never mutates production state.
+
+The current offline runner can use the in-repo synthetic fixture or an explicit
+sanitized trace/eval JSONL file:
 
 ```bash
 python -m mutalisk.optimize --optimizer local --trace-evals trace-evals.jsonl
@@ -54,8 +62,8 @@ plus refs:
 ```
 
 Candidate JSON records the eval and trace refs, dataset hash, metric, base
-module, optimized module, and optimizer version. It does not serialize raw
-trace/eval records.
+module, optimized module, optimizer version, stable content hash, manifest hash,
+and the GD-3 manifest summary. It does not serialize raw trace/eval records.
 
 ## Khala fleet-delegation program mirror
 
