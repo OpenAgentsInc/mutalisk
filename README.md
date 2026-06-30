@@ -43,6 +43,7 @@ synthetic fixture or an explicit sanitized trace/eval JSONL file:
 ```bash
 python -m mutalisk.optimize --optimizer local --trace-evals trace-evals.jsonl
 python -m mutalisk.optimize --optimizer gepa --max-metric-calls 60 --trace-evals trace-evals.jsonl
+python -m mutalisk.optimize --target khala-fleet-delegation --optimizer gepa --max-metric-calls 60
 ```
 
 Each JSONL record must already be public-safe and contain only optimizer input
@@ -84,7 +85,9 @@ delegation examples, and deterministic offline scoring helpers. The
 GEPA and emits reflective records with `Inputs`, `Generated Outputs`, and
 `Feedback(ASI)` containing the concrete blocker refs (for example
 `blocker.public.pylon_dispatch.no_available_codex_capacity`). It does not call
-an LM or network API; later Mutalisk lanes can plug this target into the GEPA
-run and candidate emitter.
+an LM or network API. The CLI target above runs upstream `gepa.optimize` over
+that adapter and emits a frozen `khala.fleet.delegation` candidate artifact with
+the base seed, optimized policy text, held-out metric gain, evidence refs, and
+trace provenance refs.
 
 See `docs/ARCHITECTURE.md`.

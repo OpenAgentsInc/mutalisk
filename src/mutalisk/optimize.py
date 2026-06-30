@@ -13,8 +13,8 @@ import argparse
 import sys
 
 from .emitter import FileCandidateEmitter
-from .optimizer import GepaOptimizer, LocalSearchOptimizer, Optimizer
-from .runner import run_optimization
+from .optimizer import DelegationGepaOptimizer, GepaOptimizer, LocalSearchOptimizer, Optimizer
+from .runner import run_delegation_optimization, run_optimization
 from .trace_eval import TraceEvalDataset
 
 
@@ -40,6 +40,12 @@ def main(argv: list[str] | None = None) -> int:
         help="candidate sink directory (gitignored; default: candidates)",
     )
     parser.add_argument(
+        "--target",
+        choices=["sentiment", "khala-fleet-delegation"],
+        default="sentiment",
+        help="optimization target (default: sentiment fixture)",
+    )
+    parser.add_argument(
         "--trace-evals",
         help=(
             "sanitized executed trace/eval JSONL file; records must contain "
@@ -50,8 +56,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=0, help="reproducibility seed")
     args = parser.parse_args(argv)
 
-    optimizer = _build_optimizer(args.optimizer, args.max_metric_calls, args.seed)
     emitter = FileCandidateEmitter(args.out_dir)
+    if args.target == "khala-fleet-delegation":
+        if args.optimizer != "gepa":
+            parser.error("--target khala-fleet-delegation currently requires --optimizer gepa")
+        if args.trace_evals:
+            parser.error("--trace-evals is only supported for the sentiment fixture target")
+        optimizer = DelegationGepaOptimizer(
+            max_metric_calls=args.max_metric_calls,
+            seed=args.seed,
+        )
+        out = run_delegation_optimization(optimizer, emitter)
+        r = out.result
+        print(f"optimizer:   {r.optimizer_id}")
+        print(f"signature:   {out.candidate.signature}")
+        print(f"metric:      {r.metric_name} {r.base_metric_value:.3f} -> {r.metric_value:.3f}")
+        print(f"components:  {r.optimized_candidate}")
+        print(f"candidate:   {out.sink_path}")
+        return 0
+
+    optimizer = _build_optimizer(args.optimizer, args.max_metric_calls, args.seed)
     trace_eval_dataset = (
         TraceEvalDataset.from_jsonl(args.trace_evals) if args.trace_evals else None
     )

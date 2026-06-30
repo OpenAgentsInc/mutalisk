@@ -11,6 +11,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .candidate import Candidate, CandidateEmitter
+from .delegation import (
+    KHALA_FLEET_DELEGATION_CANDIDATE_SIGNATURE_ID,
+    DELEGATION_SEED_CANDIDATE,
+    DelegationExample,
+    delegation_trainset,
+    delegation_valset,
+)
 from .eval_set import (
     EVAL_EVIDENCE_REF,
     TRACE_PROVENANCE_REF,
@@ -25,11 +32,23 @@ from .trace_eval import TraceEvalDataset
 
 # Provenance of the base module being improved (the weak seed program).
 BASE_MODULE_REF = "module://mutalisk/sentiment_seed@0.0.1"
+DELEGATION_BASE_MODULE_REF = "module://mutalisk/khala_fleet_delegate_seed@0.0.1"
+DELEGATION_EVAL_DATASET_REF = "eval://mutalisk/fixtures/khala-delegation@v1"
 FIXTURE_TRACE_PROVENANCE = {
     "refs": [TRACE_PROVENANCE_REF],
     "source": "mutalisk.synthetic_fixture@v1",
     "record_count": len(trainset()) + len(valset()),
 }
+
+
+def _delegation_refs(examples: list[DelegationExample]) -> tuple[list[str], dict[str, object]]:
+    eval_refs = list(dict.fromkeys(example.eval_ref for example in examples))
+    trace_refs = list(dict.fromkeys(example.trace_ref for example in examples))
+    return eval_refs, {
+        "refs": trace_refs,
+        "source": "mutalisk.synthetic_khala_delegation@v1",
+        "record_count": len(examples),
+    }
 
 
 @dataclass(frozen=True)
@@ -125,6 +144,34 @@ def run_optimization(
         base_candidate=seed,
         eval_dataset_ref=eval_dataset_ref,
         eval_evidence_refs=eval_evidence_refs,
+        trace_provenance=trace_provenance,
+    )
+    sink_path = emitter.emit(candidate)
+    return RunOutput(candidate=candidate, result=result, sink_path=sink_path)
+
+
+def run_delegation_optimization(
+    optimizer,
+    emitter: CandidateEmitter,
+    *,
+    seed_candidate: dict[str, str] | None = None,
+    train: list[DelegationExample] | None = None,
+    val: list[DelegationExample] | None = None,
+) -> RunOutput:
+    """Run GEPA over the Khala fleet-delegation target and emit a Candidate."""
+    seed = seed_candidate if seed_candidate is not None else dict(DELEGATION_SEED_CANDIDATE)
+    train_items = train if train is not None else delegation_trainset()
+    val_items = val if val is not None else delegation_valset()
+    eval_refs, trace_provenance = _delegation_refs([*train_items, *val_items])
+
+    result = optimizer.optimize(seed, train_items, val_items)
+    candidate = build_candidate(
+        result,
+        signature_id=KHALA_FLEET_DELEGATION_CANDIDATE_SIGNATURE_ID,
+        base_module_ref=DELEGATION_BASE_MODULE_REF,
+        base_candidate=seed,
+        eval_dataset_ref=DELEGATION_EVAL_DATASET_REF,
+        eval_evidence_refs=eval_refs,
         trace_provenance=trace_provenance,
     )
     sink_path = emitter.emit(candidate)

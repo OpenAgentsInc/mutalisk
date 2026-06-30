@@ -1,10 +1,11 @@
 import json
 
 from mutalisk import eval_set
+from mutalisk.delegation import KHALA_FLEET_DELEGATION_CANDIDATE_SIGNATURE_ID
 from mutalisk.emitter import FileCandidateEmitter
-from mutalisk.optimizer import LocalSearchOptimizer, OptimizeResult
+from mutalisk.optimizer import DelegationGepaOptimizer, LocalSearchOptimizer, OptimizeResult
 from mutalisk.program import SEED_CANDIDATE
-from mutalisk.runner import build_candidate, run_optimization
+from mutalisk.runner import build_candidate, run_delegation_optimization, run_optimization
 from mutalisk.signatures import SENTIMENT_SIGNATURE_ID
 from mutalisk.trace_eval import TraceEvalDataset
 
@@ -101,3 +102,19 @@ def test_runner_optimizes_over_sanitized_trace_eval_dataset(tmp_path):
     assert data["eval_evidence_refs"] == dataset.eval_evidence_refs
     assert data["trace_provenance"] == dataset.trace_provenance
     assert "great helpful release" not in json.dumps(data)
+
+
+def test_runner_emits_khala_fleet_delegation_candidate(tmp_path):
+    out = run_delegation_optimization(
+        DelegationGepaOptimizer(max_metric_calls=40, seed=0),
+        FileCandidateEmitter(tmp_path),
+    )
+    data = json.loads(open(out.sink_path).read())
+
+    assert data["signature"] == KHALA_FLEET_DELEGATION_CANDIDATE_SIGNATURE_ID
+    assert data["base_module"]["ref"] == "module://mutalisk/khala_fleet_delegate_seed@0.0.1"
+    assert data["metric"]["name"] == "khala.fleet.delegation"
+    assert data["metric"]["value"] > data["metric"]["base_value"]
+    assert data["optimized_module"]["optimizer"].startswith("gepa@")
+    assert data["eval_evidence_refs"]
+    assert data["trace_provenance"]["record_count"] > 0

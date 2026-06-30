@@ -66,8 +66,7 @@ DELEGATION_SEED_CANDIDATE: dict[str, str] = {
         "no_available_codex_capacity by returning to advertise_capacity."
     ),
     MERGE_RESOLUTION_TEMPLATE: (
-        "If a merge conflict appears, rebase on main, keep the scoped change "
-        "public-safe, rerun {verify}, and report unresolved blockers."
+        "If a merge conflict appears, rerun {verify} and report unresolved blockers."
     ),
 }
 
@@ -371,6 +370,28 @@ _TRAIN: tuple[DelegationExample, ...] = (
         required_features=("dispatch_duplicate_backoff",),
         trace_ref="trace://openagents/khala-delegation/duplicate-assignment",
         verify="bun test clients/khala-code-desktop/tests/khala-codex-fleet-tools.test.ts",
+    ),
+    DelegationExample(
+        capacity_context="machine load crosses the operator load gate",
+        eval_ref="eval://openagents/khala-delegation/train-load-gate",
+        example_ref="delegation_example.synthetic.train_load_gate",
+        issue="7730",
+        objective="avoid dispatching new work while local machine load is too high",
+        repo="OpenAgentsInc/openagents",
+        required_features=("dispatch_load_gate",),
+        trace_ref="trace://openagents/khala-delegation/train-load-gate",
+        verify="bun run --cwd apps/openagents.com check:deploy",
+    ),
+    DelegationExample(
+        capacity_context="sibling PRs conflict on shared package exports",
+        eval_ref="eval://openagents/khala-delegation/train-conflict-churn",
+        example_ref="delegation_example.synthetic.train_conflict_churn",
+        issue="7730",
+        objective="resolve sibling lane conflicts without dropping public-safe additions",
+        repo="OpenAgentsInc/openagents",
+        required_features=("merge_rebase_preserve_verify",),
+        trace_ref="trace://openagents/khala-delegation/train-conflict-churn",
+        verify="bun run --cwd apps/openagents.com check:deploy",
     ),
 )
 

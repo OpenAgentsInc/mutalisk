@@ -70,5 +70,5 @@ def test_delegation_adapter_proposes_policy_text_from_failure_refs():
     assert "no_available_codex_capacity" in proposals[DISPATCH_POLICY]
     assert "advertise_capacity" in proposals[DISPATCH_POLICY]
     assert "duplicate_active_assignment" in proposals[DISPATCH_POLICY]
-    # No conflict example is in the training split, so merge text remains unchanged here.
-    assert proposals[MERGE_RESOLUTION_TEMPLATE] == weak[MERGE_RESOLUTION_TEMPLATE]
+    assert "pr_conflicted" in proposals[MERGE_RESOLUTION_TEMPLATE]
+    assert "rebase on main" in proposals[MERGE_RESOLUTION_TEMPLATE]

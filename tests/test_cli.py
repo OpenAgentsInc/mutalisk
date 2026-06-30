@@ -77,3 +77,25 @@ def test_cli_accepts_sanitized_trace_eval_jsonl(tmp_path):
     data = json.loads(next(out_dir.glob("*.json")).read_text())
     assert data["metric"]["eval_dataset_ref"].startswith("trace-eval://sha256:")
     assert data["trace_provenance"]["record_count"] == 4
+
+
+def test_cli_emits_khala_fleet_delegation_gepa_candidate(tmp_path, capsys):
+    out_dir = tmp_path / "delegation-candidates"
+    rc = main(
+        [
+            "--target",
+            "khala-fleet-delegation",
+            "--optimizer",
+            "gepa",
+            "--max-metric-calls",
+            "40",
+            "--out-dir",
+            str(out_dir),
+        ]
+    )
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "khala.fleet.delegation" in out
+    data = json.loads(next(out_dir.glob("*.json")).read_text())
+    assert data["signature"] == "khala.fleet.delegation"
+    assert data["metric"]["value"] > data["metric"]["base_value"]

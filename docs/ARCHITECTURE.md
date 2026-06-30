@@ -43,8 +43,9 @@ results into **candidate artifacts** that the Effect online authority gates.
    writes candidates under the public-safe schema
    `{ signature, base_module, optimized_module, metric, eval_evidence_refs,
    trace_provenance }`. The local file emitter writes the exact schema to a
-   gitignored directory; an R2/object-store emitter can later reuse the same
-   interface.
+   gitignored directory; the `khala-fleet-delegation` CLI target now emits a
+   `khala.fleet.delegation` candidate with measured held-out gain over the seed
+   policy. An R2/object-store emitter can later reuse the same interface.
 5. **Reproducibility** — pinned deps, recorded versions, deterministic seeds
    where possible.
 
