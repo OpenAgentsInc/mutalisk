@@ -35,7 +35,10 @@ results into **candidate artifacts** that the Effect online authority gates.
    and wallet material are rejected before optimization.
 3. **Optimizer runners** — GEPA (reflective) and DSPy teleprompters
    (MIPRO/BootstrapFewShot). Each run records `optimizer@version`, base module,
-   metric, dataset, and provenance.
+   metric, dataset, and provenance. The fleet-delegation `MutaliskOfflineAdapter`
+   scores GD-0-style examples through the deterministic mirror and produces GEPA
+   reflective records with `Inputs`, `Generated Outputs`, and `Feedback(ASI)`
+   sections carrying the GD-1 blocker refs.
 4. **Candidate emitter** — validates (`Candidate.validate`, fail-closed) and
    writes candidates under the public-safe schema
    `{ signature, base_module, optimized_module, metric, eval_evidence_refs,

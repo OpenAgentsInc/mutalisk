@@ -79,8 +79,12 @@ parameter dict:
 ```
 
 `mutalisk.delegation` exposes the seed candidate, synthetic GD-0-style
-delegation examples, and deterministic offline scoring helpers. It does not
-call an LM or network API; later Mutalisk lanes can plug this target into the
-offline adapter, GEPA run, and candidate emitter.
+delegation examples, and deterministic offline scoring helpers. The
+`MutaliskOfflineAdapter` in `mutalisk.optimizer` evaluates those examples for
+GEPA and emits reflective records with `Inputs`, `Generated Outputs`, and
+`Feedback(ASI)` containing the concrete blocker refs (for example
+`blocker.public.pylon_dispatch.no_available_codex_capacity`). It does not call
+an LM or network API; later Mutalisk lanes can plug this target into the GEPA
+run and candidate emitter.
 
 See `docs/ARCHITECTURE.md`.
