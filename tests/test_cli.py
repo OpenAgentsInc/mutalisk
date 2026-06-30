@@ -1,9 +1,12 @@
 """End-to-end CLI test for the local (dependency-free) optimizer path."""
 
 import json
+from pathlib import Path
 import sys
 
 from mutalisk.optimize import main
+
+FIXTURE = Path(__file__).resolve().parent.parent / "fixtures" / "khala_fleet_delegation_demo.json"
 
 
 def test_cli_local_emits_candidate(tmp_path, capsys):
@@ -99,3 +102,42 @@ def test_cli_emits_khala_fleet_delegation_gepa_candidate(tmp_path, capsys):
     data = json.loads(next(out_dir.glob("*.json")).read_text())
     assert data["signature"] == "khala.fleet.delegation"
     assert data["metric"]["value"] > data["metric"]["base_value"]
+
+
+def test_cli_demo_khala_fleet_delegation_emits_summary_and_bridge_command(tmp_path, capsys):
+    summary_path = tmp_path / "summary.json"
+    candidate_out_dir = tmp_path / "candidate-artifacts"
+    rc = main(
+        [
+            "demo",
+            "khala-fleet-delegation",
+            "--dataset",
+            str(FIXTURE),
+            "--max-metric-calls",
+            "8",
+            "--candidate-out-dir",
+            str(candidate_out_dir),
+            "--emit-openagents-summary",
+            str(summary_path),
+        ]
+    )
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Mutalisk Khala fleet delegation demo: PASS" in out
+    assert "candidateManifestRef:" in out
+    assert "candidateRef:" in out
+    assert "metricValueBps:" in out
+    assert "candidateArtifact:" in out
+    assert "openagentsSummary:" in out
+    assert "part2-gepa-manifest-bridge.ts --summary" in out
+
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    artifact = json.loads(next(candidate_out_dir.glob("*.json")).read_text(encoding="utf-8"))
+    assert summary == artifact["candidateManifest"]
+    assert summary["schemaVersion"] == "psionic.probe_gepa_candidate_manifest.v1"
+    assert summary["signature"] == "khala.fleet.delegation"
+    assert summary["metricName"] == "khala.fleet.delegation"
+    assert isinstance(summary["metricValueBps"], int)
+    assert summary["evalEvidenceRefs"]
+    assert summary["traceProvenanceRefs"]

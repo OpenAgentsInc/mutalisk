@@ -6,6 +6,7 @@ venv/
 .ruff_cache/
 .mypy_cache/
 *.egg-info/
+uv.lock
 dist/
 build/
 .env
@@ -13,5 +14,6 @@ build/
 # never commit candidate outputs, traces, weights, or model artifacts
 candidates/
 artifacts/
+out/
 *.ckpt
 *.safetensors

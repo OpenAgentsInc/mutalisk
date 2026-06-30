@@ -56,6 +56,42 @@ results into **candidate artifacts** that the Effect online authority gates.
 5. **Reproducibility** — pinned deps, recorded versions, deterministic seeds
    where possible.
 
+## Part 2 demo command
+
+The recording path is:
+
+```bash
+uv run mutalisk-optimize demo khala-fleet-delegation \
+  --dataset fixtures/khala_fleet_delegation_demo.json \
+  --max-metric-calls 8 \
+  --emit-openagents-summary out/khala-fleet-delegation-summary.json
+```
+
+This command is intentionally bounded. It uses only
+`fixtures/khala_fleet_delegation_demo.json`, the offline
+`MutaliskOfflineAdapter`, and local file outputs. It does not call an LM,
+network, Pylon, OpenAgents, or a production service by default. It emits:
+
+- a detailed candidate artifact under `out/candidates/`, with the optimized
+  policy text, metric evidence, provenance, and public GD-1-style feedback
+  dimensions;
+- an exact `psionic.probe_gepa_candidate_manifest.v1` JSON summary at
+  `out/khala-fleet-delegation-summary.json`, ready for the OpenAgents no-UI
+  bridge path.
+
+The manifest summary stays compact and authority-free:
+`signature: "khala.fleet.delegation"`,
+`metricName: "khala.fleet.delegation"`, integer `metricValueBps`,
+`evalEvidenceRefs`, and `traceProvenanceRefs`. It does not carry raw prompts,
+raw traces, local paths, private source, or credentials. The CLI prints the
+bridge command that OpenAgents issue #7754 implements:
+
+```bash
+bun clients/khala-code-desktop/scripts/part2-gepa-manifest-bridge.ts \
+  --summary out/khala-fleet-delegation-summary.json \
+  --out out/khala-gepa-bridge-proof.json
+```
+
 ## Non-goals
 
 - No online serving, no routing, no governance/admission, no production writes,

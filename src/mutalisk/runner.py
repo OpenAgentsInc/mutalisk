@@ -68,9 +68,19 @@ def build_candidate(
     base_candidate: dict[str, str] | None = None,
     eval_dataset_ref: str = EVAL_EVIDENCE_REF,
     eval_evidence_refs: list[str] | None = None,
+    metric_extras: dict[str, object] | None = None,
     trace_provenance: dict[str, object] | None = None,
 ) -> Candidate:
     """Assemble a fail-closed-validated Candidate from an optimize result."""
+    metric = {
+        "name": result.metric_name,
+        "value": result.metric_value,
+        "base_value": result.base_metric_value,
+        "eval_dataset_ref": eval_dataset_ref,
+        "higher_is_better": True,
+    }
+    if metric_extras:
+        metric.update(metric_extras)
     candidate = Candidate(
         signature=signature_id,
         base_module={
@@ -82,13 +92,7 @@ def build_candidate(
             "components": result.optimized_candidate,
             "optimizer": result.optimizer_id,
         },
-        metric={
-            "name": result.metric_name,
-            "value": result.metric_value,
-            "base_value": result.base_metric_value,
-            "eval_dataset_ref": eval_dataset_ref,
-            "higher_is_better": True,
-        },
+        metric=metric,
         eval_evidence_refs=(
             eval_evidence_refs if eval_evidence_refs is not None else [EVAL_EVIDENCE_REF]
         ),

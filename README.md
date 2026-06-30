@@ -54,6 +54,35 @@ python -m mutalisk.optimize --optimizer gepa --max-metric-calls 60 --trace-evals
 python -m mutalisk.optimize --target khala-fleet-delegation --optimizer gepa --max-metric-calls 60
 ```
 
+For the Part 2 Khala Code demo, use the bounded one-command fixture runner:
+
+```bash
+uv run mutalisk-optimize demo khala-fleet-delegation \
+  --dataset fixtures/khala_fleet_delegation_demo.json \
+  --max-metric-calls 8 \
+  --emit-openagents-summary out/khala-fleet-delegation-summary.json
+```
+
+That command runs the offline GEPA adapter over public-safe delegation fixtures
+only. It does not call an LM, network API, Pylon, OpenAgents, or any production
+service. It writes a detailed candidate artifact under `out/candidates/` and
+the exact OpenAgents-ingestible manifest summary at
+`out/khala-fleet-delegation-summary.json`. The summary schema is
+`psionic.probe_gepa_candidate_manifest.v1` and includes
+`signature: "khala.fleet.delegation"`,
+`metricName: "khala.fleet.delegation"`, integer `metricValueBps`,
+`evalEvidenceRefs`, and `traceProvenanceRefs`.
+
+The CLI output prints `candidateManifestRef`, `candidateRef`, metric bps, the
+artifact path, the summary path, and the copy/paste command for the OpenAgents
+no-UI bridge:
+
+```bash
+bun clients/khala-code-desktop/scripts/part2-gepa-manifest-bridge.ts \
+  --summary out/khala-fleet-delegation-summary.json \
+  --out out/khala-gepa-bridge-proof.json
+```
+
 Each JSONL record must already be public-safe and contain only optimizer input
 plus refs:
 
@@ -97,5 +126,12 @@ an LM or network API. The CLI target above runs upstream `gepa.optimize` over
 that adapter and emits a frozen `khala.fleet.delegation` candidate artifact with
 the base seed, optimized policy text, held-out metric gain, evidence refs, and
 trace provenance refs.
+
+The demo fixture runner additionally annotates the detailed artifact with
+GD-1-style feedback dimensions such as `capacity_recovery`, `typed_blockers`,
+`verifier_closeout`, and `merge_recovery`. Those dimensions contain only
+public evidence refs, trace refs, metric bps, and blocker refs; they do not
+serialize raw traces, private paths, customer prompts, credentials, or hidden
+reasoning.
 
 See `docs/ARCHITECTURE.md`.

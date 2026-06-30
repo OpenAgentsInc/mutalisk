@@ -1,0 +1,132 @@
+{
+  "datasetRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo@v1",
+  "examples": [
+    {
+      "capacityContext": "cold start projected 0/1 Codex capacity",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/no-capacity-recovery",
+      "exampleRef": "delegation_example.demo.no_capacity_recovery",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "recover from a cold no-capacity delegation start before dispatch",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "dispatch_per_account_capacity",
+        "dispatch_no_capacity_advertise"
+      ],
+      "split": "train",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/no-capacity-recovery",
+      "verify": "bun test clients/khala-code-desktop/tests/khala-codex-fleet-tools.test.ts"
+    },
+    {
+      "capacityContext": "heartbeat may be stale between capacity probe and dispatch",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/stale-heartbeat",
+      "exampleRef": "delegation_example.demo.stale_heartbeat",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "refresh stale heartbeat and retry dispatch once",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "dispatch_stale_heartbeat_retry"
+      ],
+      "split": "train",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/stale-heartbeat",
+      "verify": "bun run typecheck:khala-code-desktop"
+    },
+    {
+      "capacityContext": "repo work with a public issue and explicit verifier",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/repo-verifier",
+      "exampleRef": "delegation_example.demo.repo_verifier",
+      "issue": "OpenAgentsInc/openagents#7752",
+      "objective": "implement a public demo issue and close it with evidence",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "objective_issue_repo_verify",
+        "verifier_required_for_repo"
+      ],
+      "split": "train",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/repo-verifier",
+      "verify": "bun clients/khala-code-desktop/scripts/part2-delegation-smoke.ts"
+    },
+    {
+      "capacityContext": "duplicate active assignment can appear on sibling work",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/duplicate-assignment",
+      "exampleRef": "delegation_example.demo.duplicate_assignment",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "retry safely when a duplicate active assignment is observed",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "dispatch_duplicate_backoff"
+      ],
+      "split": "train",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/duplicate-assignment",
+      "verify": "bun test clients/khala-code-desktop/tests/khala-codex-fleet-tools.test.ts"
+    },
+    {
+      "capacityContext": "machine load crosses the operator load gate before assignment",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/train-load-gate",
+      "exampleRef": "delegation_example.demo.train_load_gate",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "skip new dispatch while local machine load is too high",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "dispatch_load_gate"
+      ],
+      "split": "train",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/train-load-gate",
+      "verify": "bun run typecheck:khala-code-desktop"
+    },
+    {
+      "capacityContext": "sibling work conflicts on shared package exports during rebase",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/train-conflict-churn",
+      "exampleRef": "delegation_example.demo.train_conflict_churn",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "preserve sibling lane additions while resolving a conflict",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "merge_rebase_preserve_verify"
+      ],
+      "split": "train",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/train-conflict-churn",
+      "verify": "bun run typecheck:khala-code-desktop"
+    },
+    {
+      "capacityContext": "machine load crosses the operator load gate",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/load-gate",
+      "exampleRef": "delegation_example.demo.load_gate",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "avoid dispatching new work while local machine load is too high",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "dispatch_load_gate"
+      ],
+      "split": "val",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/load-gate",
+      "verify": "bun run typecheck:khala-code-desktop"
+    },
+    {
+      "capacityContext": "sibling work conflicts on shared package exports",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/conflict-churn",
+      "exampleRef": "delegation_example.demo.conflict_churn",
+      "issue": "OpenAgentsInc/openagents#7730",
+      "objective": "resolve sibling lane conflicts without dropping public-safe additions",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [
+        "merge_rebase_preserve_verify"
+      ],
+      "split": "val",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/conflict-churn",
+      "verify": "bun run typecheck:khala-code-desktop"
+    },
+    {
+      "capacityContext": "fixture no-repo smoke with available ready account",
+      "evalRef": "eval://mutalisk/fixtures/khala-fleet-delegation-demo/fixture-clean",
+      "exampleRef": "delegation_example.demo.fixture_clean",
+      "issue": "fixture",
+      "objective": "run the no-spend public fixture",
+      "repo": "OpenAgentsInc/openagents",
+      "requiredFeatures": [],
+      "split": "val",
+      "traceRef": "trace://mutalisk/fixtures/khala-fleet-delegation-demo/fixture-clean",
+      "verify": "fixture:codex_agent_task"
+    }
+  ],
+  "schemaVersion": "mutalisk.khala_fleet_delegation_demo_dataset.v1"
+}
